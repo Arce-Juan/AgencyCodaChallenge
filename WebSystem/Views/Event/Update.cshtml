@@ -21,7 +21,7 @@
 
 <div class="row">
     <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12">
-        <h3>Nuevo Evento</h3>
+        <h3>Editar Evento</h3>
         @using (Html.BeginForm("UpdateEvent", "Event", new {}, FormMethod.Post, false, new { @class = "form-horizontal", role = "form" }))
         {
 
@@ -30,28 +30,34 @@
             <input id="idHiddenToken" name="nHiddenToken" type="hidden" value="@Model.AccessToken">
         </div>
 
+         <div class="form-group">
+            <label class="col-md-2 control-label" for="UserNameText">Id Evento</label>
+            <input class="form-control" data-val="true" id="idInputEvent" name="nInputEvent" readonly type="text" value="@Model.EventCalendar.Id">
+        </div>
+
+
         <div class="form-group">
             <label class="col-md-2 control-label" for="UserNameText">Titulo</label>
-            <input class="form-control" data-val="true" id="idInputTitulo" name="nInputTitulo" placeholder="" type="text" value="">
+            <input class="form-control" data-val="true" id="idInputTitulo" name="nInputTitulo" placeholder="" type="text" value="@Model.EventCalendar.Subject">
         </div>
 
         <div class="form-group">
             <label class="col-md-2 control-label" for="UserNameText">Detalles</label>
-            <input class="form-control" data-val="true" id="idInputDetalles" name="nInputDetalles" placeholder="" type="text" value="">
+            <input class="form-control" data-val="true" id="idInputDetalles" name="nInputDetalles" placeholder="" type="text" value="@Model.EventCalendar.Body.Content">
         </div>
 
         <div class="form-group">
             <label class="col-md-2 control-label" for="UserNameText">Inicia</label>
-            <input class="form-control" id="idInputInicia" name="nInputInicia" type="datetime-local">
+            <input class="form-control" id="idInputInicia" name="nInputInicia" type="datetime-local" value="@Model.EventCalendar.Start.DateTime">
         </div>
 
         <div class="form-group">
             <label class="col-md-2 control-label" for="UserNameText">Finaliza</label>
-            <input class="form-control" id="idInputFinaliza" name="nInputFinaliza"  type="datetime-local">
+            <input class="form-control" id="idInputFinaliza" name="nInputFinaliza"  type="datetime-local" value="@Model.EventCalendar.End.DateTime">
         </div>
 
          <div class="form-group">
-            <button class="btn btn-primary" type="submit" id="idButtonCreate">Guardar</button>
+            <button class="btn btn-primary" type="submit" id="idButtonCreate">Editar</button>
             <button class="btn btn-secondary" type="button" id="idButtonReturn">Volver</button>
         </div>
         }

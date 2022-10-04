@@ -24,8 +24,8 @@ namespace WebApi.Controllers.Outlook
             }));
         }
 
-        [HttpGet("GetEvent/{eventId}/{accessToken}")]
-        public async Task<IActionResult> GetEvent(string accessToken, [FromRoute] string eventId)
+        [HttpGet("GetEvent")]
+        public async Task<IActionResult> GetEvent(string accessToken, string eventId)
         {
             return Ok(await Mediator.Send(new GetEventRequest()
             {
@@ -45,8 +45,8 @@ namespace WebApi.Controllers.Outlook
             }));
         }
 
-        [HttpPut("UpdateEvent/{eventId}/{accessToken}")]
-        public async Task<IActionResult> UpdateEvent([FromRoute] string accessToken, [FromRoute] string eventId, [FromBody] EventCalendar calendarEvent)
+        [HttpPut("UpdateEvent")]
+        public async Task<IActionResult> UpdateEvent([FromQuery] string accessToken, [FromQuery] string eventId, [FromBody] EventCalendar calendarEvent)
         {
             calendarEvent.Id = eventId;
             return Ok(await Mediator.Send(new UpdateEventRequest()

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
+using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using WebSystem.Dtos;
@@ -15,7 +16,6 @@ namespace WebSystem.Controllers.Outlook
         //[HttpGet]
         public ActionResult Index(string accessToken)
         {
-
             RestClient restClient = new RestClient($"https://localhost:5001/api/v1/Event/AllEvents");
             RestRequest restRequest = new RestRequest();
             restRequest.AddParameter("accessToken", accessToken);
@@ -29,7 +29,6 @@ namespace WebSystem.Controllers.Outlook
                 var eventsJsonString = JsonConvert.SerializeObject(eventsJson);
 
                 events = JsonConvert.DeserializeObject<List<EventCalendarDto>>(eventsJsonString);
-                //var events = Newtonsoft.Json.JsonConvert.DeserializeObject<List<EventCalendarDto>>(response.Content);
             }
 
             var model = new AllEventsModel()
@@ -40,20 +39,7 @@ namespace WebSystem.Controllers.Outlook
 
             return View(model);
         }
-        /*
-        [HttpGet("GetAllEvents")]
-        public ActionResult GetAllEvents(string accessToken)
-        {
-            RestClient restClient = new RestClient($"https://localhost:5001/api/v1/Event/AllEvents");
-            RestRequest restRequest = new RestRequest();
-            restRequest.AddParameter("accessToken", accessToken);
-
-            var response = restClient.Get(restRequest); 
-
-            return Ok(response);
-        }
-        */
-        //[HttpGet("Create")]
+        
         public ActionResult Create(string accessToken)
         {
             var model = new ABMEventModel()
@@ -64,7 +50,6 @@ namespace WebSystem.Controllers.Outlook
             return View(model);
         }
 
-        //[HttpPost("CreateEvent")]
         public ActionResult CreateEvent(IFormCollection collection)
         {
             try
@@ -116,14 +101,92 @@ namespace WebSystem.Controllers.Outlook
             }
         }
 
-        public ActionResult Update(string accessToken)
+        public ActionResult Update(string idEvent, string accessToken)
         {
+            RestClient restClient = new RestClient($"https://localhost:5001/api/v1/Event/GetEvent");
+            RestRequest restRequest = new RestRequest();
+            restRequest.AddParameter("accessToken", accessToken);
+            restRequest.AddParameter("eventId", idEvent);
+
+            var response = restClient.Get(restRequest);
+            
+            var eventCalendar = new EventCalendarDto();
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                var eventsJson = JObject.Parse(response.Content)["eventCalendar"];
+                var eventJsonString = JsonConvert.SerializeObject(eventsJson);
+                eventCalendar = JsonConvert.DeserializeObject<EventCalendarDto>(eventJsonString);
+
+                string[] validformats = new string[] { "dd/MM/yyyy HH:mm:ss" };
+                CultureInfo provider = new CultureInfo("en-US");
+
+                var startDate = DateTime.ParseExact(eventCalendar.Start.DateTime, validformats, provider);
+                var endDate = DateTime.ParseExact(eventCalendar.End.DateTime, validformats, provider);
+
+                eventCalendar.Start.DateTime = startDate.ToString("yyyy-MM-dd hh:mm");
+                eventCalendar.End.DateTime = endDate.ToString("yyyy-MM-dd hh:mm");
+            }
+
             var model = new ABMEventModel()
             {
-                AccessToken = accessToken
+                AccessToken = accessToken,
+                EventCalendar = eventCalendar
             };
 
             return View(model);
+        }
+
+        public ActionResult UpdateEvent(IFormCollection collection)
+        {
+            try
+            {
+                string accessToken = collection["nHiddenToken"];
+                string eventId = collection["nInputEvent"];
+                string subject = collection["nInputTitulo"];
+                string content = collection["nInputDetalles"];
+                string startDate = collection["nInputInicia"];
+                string endDate = collection["nInputFinaliza"];
+
+                RestClient client = new RestClient("https://localhost:5001/api/v1/");
+                RestRequest request = new RestRequest("Event/UpdateEvent/", Method.Put);
+                request.AddHeader("content-type", "application/json");
+                request.AddQueryParameter("accessToken", accessToken);
+                request.AddQueryParameter("eventId", eventId);
+
+                var body = new
+                {
+                    Id = "",
+                    Subject = subject,
+                    Body = new
+                    {
+                        ContentType = "text",
+                        Content = content
+                    },
+                    Start = new
+                    {
+                        DateTime = startDate,
+                        TimeZone = "UTC"
+                    },
+                    End = new
+                    {
+                        DateTime = endDate,
+                        TimeZone = "UTC"
+                    }
+                };
+                request.AddJsonBody(body);
+
+                var response = client.PutAsync(request).Result;
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    return RedirectToAction("Index", "Event", new { accessToken = accessToken });
+                }
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         public ActionResult DeleteEvent(IFormCollection collection)
@@ -169,5 +232,20 @@ namespace WebSystem.Controllers.Outlook
             return Ok(response);
         }
         */
+
+        /*
+        [HttpGet("GetAllEvents")]
+        public ActionResult GetAllEvents(string accessToken)
+        {
+            RestClient restClient = new RestClient($"https://localhost:5001/api/v1/Event/AllEvents");
+            RestRequest restRequest = new RestRequest();
+            restRequest.AddParameter("accessToken", accessToken);
+
+            var response = restClient.Get(restRequest); 
+
+            return Ok(response);
+        }
+        */
+        //[HttpGet("Create")]
     }
 }
