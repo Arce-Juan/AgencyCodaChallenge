@@ -6,5 +6,6 @@ namespace WebSystem.Models.Outlook
     {
         public string AccessToken { get; set; }
         public EventCalendarDto EventCalendar { get; set; }
+        public string ErrorMessage { get; set; }
     }
 }

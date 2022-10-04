@@ -22,11 +22,10 @@
 <div class="row">
     <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12">
         <h3>Nuevo Evento</h3>
-        @using (Html.BeginForm("CreateEvent", "Event", new {}, FormMethod.Post, false, new { @class = "form-horizontal", role = "form" }))
+        @using (Html.BeginForm("CreateEvent", "Event", new {}, FormMethod.Post, false, new { id = "idFormCreate", @class = "form-horizontal", role = "form" }))
         {
 
         <div class="form-group">
-            <label class="col-md-2 control-label" for="UserNameText">Titulo</label>
             <input id="idHiddenToken" name="nHiddenToken" type="hidden" value="@Model.AccessToken">
         </div>
 
@@ -59,12 +58,80 @@
     </div>
 </div>
 
-<script type="text/javascript">
+<div class="modal fade modal-slide-in-right" aria-hidden="true" role="dialog" tabindex="-1" id="modal-error">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h4 class="modal-title">Error</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Se produjo un error al realizar la solicitud de modificación. Detalles:</p>
+                <p id="idModalErrorMessage">-.-</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script type="text/javascript">
     
 jQuery(document).ready(function () {
-
+    if ('@Model.ErrorMessage' !== ''){
+        LanzarModalError('@Model.ErrorMessage');
+    }
 });
+
+$('#idButtonReturn').on('click', function () {
+    location.href = "https://localhost:7169/Event?accessToken=@Model.AccessToken";
+});
+
+var LanzarModalError = function (errorMessage) {
+    $("#idModalErrorMessage").html(errorMessage);
+    $("#modal-error").modal("show");
+};
+
+
+var ValidateData = function() {
+    var errorColection = "";
+
+    
+
+    if ($("#idInputTitulo").val() == "")
+        errorColection = errorColection + "Se debe agregar el Título del Evento.<br>";
+
+    if ($("#idInputInicia").val() == "")
+        errorColection = errorColection + "Se debe agregar la Fecha de Inicio del Evento.<br>";
+
+    if ($("#idInputFinaliza").val() == "")
+        errorColection = errorColection + "Se debe agregar la Fecha de Fin del Evento.<br>";
+
+    if ($("#idInputInicia").val() !== "" && $("#idInputFinaliza").val() !== "")
+    {
+        var startDate = Date.parse($("#idInputInicia").val());
+        var endDate = Date.parse($("#idInputFinaliza").val());
+        if (startDate > endDate)
+            errorColection = errorColection + "La fecha de Inicio no debe ser superior a la fecha de Fin.<br>";
+    }
+
+    return errorColection;
+}
+
+
+$("#idFormCreate").submit(function (event) {
+    debugger;
+    var errors = ValidateData();
+    if (errors !== "")
+    {
+        LanzarModalError(errors);
+        return false;
+    }
+});
+
 /*
 $('#idButtonCreate').on('click', function () {
 
@@ -166,10 +233,6 @@ $('#idButtonCreate').on('click', function () {
         }
     });
     */
-});
 
-$('#idButtonReturn').on('click', function () {
-    location.href = "https://localhost:7169/Event";
-});
 
 </script>

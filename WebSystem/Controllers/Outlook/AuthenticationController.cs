@@ -5,19 +5,14 @@ using WebSystem.Models.Outlook;
 
 namespace WebSystem.Controllers.Outlook
 {
-    [ApiController]
-    [Route("[controller]")]
-
     public class AuthenticationController : Controller
     {
-        [HttpGet]
         public ActionResult Index()
         {
             var model = new AuthenticationModel();
             return View(model);
         }
 
-        [HttpGet("LoginUser")]
         public ActionResult LoginUser()
         {
             RestClient restClient = new RestClient($"https://localhost:5001/api/v1/Authentication/RedirectUrl");
@@ -28,7 +23,6 @@ namespace WebSystem.Controllers.Outlook
             return Ok(response);
         }
 
-        [HttpGet("LoginSuccess")]
         public ActionResult LoginSuccess(string code, string state)
         {
             var model = new LoginSuccessModel()
@@ -40,7 +34,6 @@ namespace WebSystem.Controllers.Outlook
             return View(model);
         }
 
-        [HttpGet("Callback")]
         public ActionResult Callback(string CodeAuth)
         {
             RestClient restClient = new RestClient($"https://localhost:5001/api/v1/Authentication/Callback");

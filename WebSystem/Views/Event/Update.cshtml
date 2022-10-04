@@ -22,28 +22,27 @@
 <div class="row">
     <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12">
         <h3>Editar Evento</h3>
-        @using (Html.BeginForm("UpdateEvent", "Event", new {}, FormMethod.Post, false, new { @class = "form-horizontal", role = "form" }))
+        @using (Html.BeginForm("UpdateEvent", "Event", new {}, FormMethod.Post, false, new { id = "idForm", @class = "form-horizontal", role = "form" }))
         {
 
         <div class="form-group">
-            <label class="col-md-2 control-label" for="UserNameText">Titulo</label>
             <input id="idHiddenToken" name="nHiddenToken" type="hidden" value="@Model.AccessToken">
         </div>
 
          <div class="form-group">
             <label class="col-md-2 control-label" for="UserNameText">Id Evento</label>
-            <input class="form-control" data-val="true" id="idInputEvent" name="nInputEvent" readonly type="text" value="@Model.EventCalendar.Id">
+            <input class="form-control" id="idInputEvent" name="nInputEvent" readonly type="text" value="@Model.EventCalendar.Id">
         </div>
 
 
         <div class="form-group">
             <label class="col-md-2 control-label" for="UserNameText">Titulo</label>
-            <input class="form-control" data-val="true" id="idInputTitulo" name="nInputTitulo" placeholder="" type="text" value="@Model.EventCalendar.Subject">
+            <input class="form-control" id="idInputTitulo" name="nInputTitulo" placeholder="" type="text" value="@Model.EventCalendar.Subject">
         </div>
 
         <div class="form-group">
             <label class="col-md-2 control-label" for="UserNameText">Detalles</label>
-            <input class="form-control" data-val="true" id="idInputDetalles" name="nInputDetalles" placeholder="" type="text" value="@Model.EventCalendar.Body.Content">
+            <input class="form-control" id="idInputDetalles" name="nInputDetalles" placeholder="" type="text" value="@Model.EventCalendar.Body.Content">
         </div>
 
         <div class="form-group">
@@ -65,16 +64,67 @@
     </div>
 </div>
 
+
+<div class="modal fade modal-slide-in-right" aria-hidden="true" role="dialog" tabindex="-1" id="modal-error">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h4 class="modal-title">Error</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Se produjo un error al realizar la solicitud de modificación. Detalles:</p>
+                <p id="idModalErrorMessage">-.-</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript">
 
     
-jQuery(document).ready(function () {
+var LanzarModalError = function (errorMessage) {
+    $("#idModalErrorMessage").html(errorMessage);
+    $("#modal-error").modal("show");
+};
 
-});
+jQuery(document).ready(function () {
+    if ('@Model.ErrorMessage' !== ''){
+        LanzarModalError('@Model.ErrorMessage');
+    }
 });
 
 $('#idButtonReturn').on('click', function () {
-    location.href = "https://localhost:7169/Event";
+    location.href = "https://localhost:7169/Event?accessToken=@Model.AccessToken";
+});
+
+var ValidateData = function() {
+    var errorColection = "";
+    if ($("#idInputTitulo").val() == "")
+        errorColection = errorColection + "Se debe agregar el Título del Evento.<br>";
+
+    if ($("#idInputInicia").val() == "")
+        errorColection = errorColection + "Se debe agregar la Fecha de Inicio del Evento.<br>";
+
+    if ($("#idInputFinaliza").val() == "")
+        errorColection = errorColection + "Se debe agregar la Fecha de Fin del Evento.<br>";
+
+    return errorColection;
+}
+
+$("#idForm").submit(function(event) {
+    debugger;
+    var errors = ValidateData();
+    if (errors !== "")
+    {
+        LanzarModalError(errors);
+        return false;
+    }
 });
 
 </script>

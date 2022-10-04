@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using WebSystem.Dtos;
+using WebSystem.Helpers;
 using WebSystem.Models.Outlook;
 
 namespace WebSystem.Controllers.Outlook
@@ -40,11 +41,12 @@ namespace WebSystem.Controllers.Outlook
             return View(model);
         }
         
-        public ActionResult Create(string accessToken)
+        public ActionResult Create(string accessToken, string errorMessage = "")
         {
             var model = new ABMEventModel()
             {
-                AccessToken = accessToken
+                AccessToken = accessToken,
+                ErrorMessage = errorMessage
             };
 
             return View(model);
@@ -52,56 +54,57 @@ namespace WebSystem.Controllers.Outlook
 
         public ActionResult CreateEvent(IFormCollection collection)
         {
+            
+            string accessToken = collection["nHiddenToken"];
+            string subject = collection["nInputTitulo"];
+            string content = collection["nInputDetalles"];
+            string startDate = collection["nInputInicia"];
+            string endDate = collection["nInputFinaliza"];
+
+            RestClient client = new RestClient("https://localhost:5001/api/v1/");
+            RestRequest request = new RestRequest("Event/CreateEvent/", Method.Post);
+            request.AddHeader("content-type", "application/json");
+            request.AddQueryParameter("accessToken", accessToken);
+
+            var body = new
+            {
+                Id = "",
+                Subject = subject,
+                Body = new
+                {
+                    ContentType = "text",
+                    Content = content
+                },
+                Start = new
+                {
+                    DateTime = startDate,
+                    TimeZone = "UTC"
+                },
+                End = new
+                {
+                    DateTime = endDate,
+                    TimeZone = "UTC"
+                }
+            };
+
+            request.AddJsonBody(body);
+
             try
             {
-                string accessToken = collection["nHiddenToken"];
-                string subject = collection["nInputTitulo"];
-                string content = collection["nInputDetalles"];
-                string startDate = collection["nInputInicia"];
-                string endDate = collection["nInputFinaliza"];
-
-                RestClient client = new RestClient("https://localhost:5001/api/v1/");
-                RestRequest request = new RestRequest("Event/CreateEvent/", Method.Post);
-                request.AddHeader("content-type", "application/json");
-                request.AddQueryParameter("accessToken", accessToken);
-
-                var body = new
-                {
-                    Id = "",
-                    Subject = subject,
-                    Body = new
-                    {
-                        ContentType = "text",
-                        Content = content
-                    },
-                    Start = new
-                    {
-                        DateTime = startDate,
-                        TimeZone = "UTC"
-                    },
-                    End = new
-                    {
-                        DateTime = endDate,
-                        TimeZone = "UTC"
-                    }
-                };
-                request.AddJsonBody(body);
-
                 var response = client.PostAsync(request).Result;
 
                 if (response.StatusCode == HttpStatusCode.OK)
-                {
                     return RedirectToAction("Index", "Event", new { accessToken = accessToken });
-                }
-                return Ok(response);
+                else
+                    return RedirectToAction("Create", "Event", new { accessToken = accessToken, errorMessage = response.StatusDescription });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return RedirectToAction("Create", "Event", new { accessToken = accessToken, errorMessage = ex.Message });
             }
         }
 
-        public ActionResult Update(string idEvent, string accessToken)
+        public ActionResult Update(string idEvent, string accessToken, string errorMessage = "")
         {
             RestClient restClient = new RestClient($"https://localhost:5001/api/v1/Event/GetEvent");
             RestRequest restRequest = new RestRequest();
@@ -117,20 +120,24 @@ namespace WebSystem.Controllers.Outlook
                 var eventJsonString = JsonConvert.SerializeObject(eventsJson);
                 eventCalendar = JsonConvert.DeserializeObject<EventCalendarDto>(eventJsonString);
 
-                string[] validformats = new string[] { "dd/MM/yyyy HH:mm:ss" };
-                CultureInfo provider = new CultureInfo("en-US");
+                eventCalendar.Start.DateTime = CustomFormats.CustomDateFormat(eventCalendar.Start.DateTime);
+                eventCalendar.End.DateTime = CustomFormats.CustomDateFormat(eventCalendar.End.DateTime);
 
+                /*
+                string[] validformats = new string[] { "MM/dd/yyyy HH:mm:ss" };
+                CultureInfo provider = new CultureInfo("en-US");
                 var startDate = DateTime.ParseExact(eventCalendar.Start.DateTime, validformats, provider);
                 var endDate = DateTime.ParseExact(eventCalendar.End.DateTime, validformats, provider);
-
                 eventCalendar.Start.DateTime = startDate.ToString("yyyy-MM-dd hh:mm");
                 eventCalendar.End.DateTime = endDate.ToString("yyyy-MM-dd hh:mm");
+                */
             }
 
             var model = new ABMEventModel()
             {
                 AccessToken = accessToken,
-                EventCalendar = eventCalendar
+                EventCalendar = eventCalendar,
+                ErrorMessage = errorMessage
             };
 
             return View(model);
@@ -138,54 +145,56 @@ namespace WebSystem.Controllers.Outlook
 
         public ActionResult UpdateEvent(IFormCollection collection)
         {
+           
+            string accessToken = collection["nHiddenToken"];
+            string eventId = collection["nInputEvent"];
+            string subject = collection["nInputTitulo"];
+            string content = collection["nInputDetalles"];
+            var starAux = DateTime.Parse(collection["nInputInicia"]);
+            var endAux = DateTime.Parse(collection["nInputFinaliza"]);
+            string startDate = starAux.ToString("MM/dd/yyyy HH:mm:ss");
+            string endDate = endAux.ToString("MM/dd/yyyy HH:mm:ss");
+
+            RestClient client = new RestClient("https://localhost:5001/api/v1/");
+            RestRequest request = new RestRequest("Event/UpdateEvent/", Method.Put);
+            request.AddHeader("content-type", "application/json");
+            request.AddQueryParameter("accessToken", accessToken);
+            request.AddQueryParameter("eventId", eventId);
+
+            var body = new
+            {
+                Id = "",
+                Subject = subject,
+                Body = new
+                {
+                    ContentType = "text",
+                    Content = content
+                },
+                Start = new
+                {
+                    DateTime = startDate,
+                    TimeZone = "UTC"
+                },
+                End = new
+                {
+                    DateTime = endDate,
+                    TimeZone = "UTC"
+                }
+            };
+            request.AddJsonBody(body);
+
             try
             {
-                string accessToken = collection["nHiddenToken"];
-                string eventId = collection["nInputEvent"];
-                string subject = collection["nInputTitulo"];
-                string content = collection["nInputDetalles"];
-                string startDate = collection["nInputInicia"];
-                string endDate = collection["nInputFinaliza"];
-
-                RestClient client = new RestClient("https://localhost:5001/api/v1/");
-                RestRequest request = new RestRequest("Event/UpdateEvent/", Method.Put);
-                request.AddHeader("content-type", "application/json");
-                request.AddQueryParameter("accessToken", accessToken);
-                request.AddQueryParameter("eventId", eventId);
-
-                var body = new
-                {
-                    Id = "",
-                    Subject = subject,
-                    Body = new
-                    {
-                        ContentType = "text",
-                        Content = content
-                    },
-                    Start = new
-                    {
-                        DateTime = startDate,
-                        TimeZone = "UTC"
-                    },
-                    End = new
-                    {
-                        DateTime = endDate,
-                        TimeZone = "UTC"
-                    }
-                };
-                request.AddJsonBody(body);
-
                 var response = client.PutAsync(request).Result;
 
                 if (response.StatusCode == HttpStatusCode.OK)
-                {
                     return RedirectToAction("Index", "Event", new { accessToken = accessToken });
-                }
-                return Ok(response);
+                else
+                    return RedirectToAction("Update", "Event", new { eventId= eventId, accessToken = accessToken, errorMessage = response.StatusDescription});
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return RedirectToAction("Update", "Event", new { idEvent = eventId, accessToken = accessToken, errorMessage = ex.Message });
             }
         }
 

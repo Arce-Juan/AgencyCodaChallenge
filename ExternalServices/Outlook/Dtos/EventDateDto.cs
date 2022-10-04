@@ -1,4 +1,7 @@
-﻿namespace ExternalServices.Outlook.Dtos
+﻿using System.Globalization;
+using System;
+
+namespace ExternalServices.Outlook.Dtos
 {
     public class EventDateDto
     {
