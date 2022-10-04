@@ -1,0 +1,156 @@
+﻿@using WebSystem.Models.Outlook
+
+@model AllEventsModel
+@{
+    ViewData["Title"] = "Calendario";
+    Layout = "~/Views/Shared/_PrincipalSitie.cshtml";
+}
+
+<style>
+    .image-sin-padding {
+        padding-top: 0px;
+        padding-right: 0px;
+        padding-bottom: 0px;
+        padding-left: 0px;
+    }
+</style>
+
+<div class="row">
+    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
+        <h3>Listado de Eventos</h3>
+    </div>
+</div>
+
+<!--
+<div class="row">
+    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
+        <div class="form-group">
+            <div class="input-group">
+                <input type="text" class="form-control" name="searchText" placeholder="Buscar..." value="">
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+-->
+
+<div class="row">
+    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
+        <div class="form-group">
+            <button class="btn btn-success" id="idButonNewEvent">Nuevo Evento</button>
+            <input type="hidden" id="idHiddenToken" value="@Model.AccessToken"/>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive">
+            <table id="idTableEvents" class="table table-striped table-bordered table-condensed table-hover">
+                <thead>
+                    <th scope="col">Id</th>
+                    <th scope="col">Titulo</th>
+                    <th scope="col">Detalles</th>
+                    <th scope="col">Inicio</th>
+                    <th scope="col">Fin</th>
+                    <th scope="col">Acciones</th>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.EventCalendar)
+                    {
+                    <tr>
+                        <td>@item.Id.Substring(120,20)</td>
+                        <td>@item.Subject</td>
+                        <td>@item.Body.Content</td>
+                        <td>@item.Start.DateTime</td>
+                        <td>@item.End.DateTime</td>
+                        <td style="width: 115px;">
+                            <a class="btn btn-info" href="/Event/Update/?idEvent=@item.Id&accessToken=@Model.AccessToken" role="button" title="Editar"><i class="fas fa-pencil-alt"></i></a>
+                            <a class="btn btn-danger" href="" title="Eliminar" onclick="return LanzarModalEliminar('@item.Id', '@item.Subject')"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade modal-slide-in-right" aria-hidden="true" role="dialog" tabindex="-1" id="modal-delete">
+    @using (Html.BeginForm("DeleteEvent", "Event", new {}, FormMethod.Post, false, new { @class = "form-horizontal", role = "form" }))
+    {
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h4 class="modal-title">Eliminar Evento?</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Confirme si desea Eliminar el Evento</p>
+                    <p id="idPEliminar"></p>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="nHiddenTokenEliminar" id="idHiddenTokenEliminar" value="@Model.AccessToken" />
+                    <input type="hidden" name="nEventToDelete" id="idEventToDelete" value="@Model.AccessToken" />
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    
+$('#idButonNewEvent').on('click', function () {
+    //location.href = 'https://localhost:7169/Event/Create?accessToken=' + Global_GetCookie('_accessToken');
+    location.href = 'https://localhost:7169/Event/Create?accessToken=' + '@Model.AccessToken';
+});
+
+jQuery(document).ready(function () {
+    console.log("Token!!");
+    console.log('@Model.AccessToken');
+
+    /*
+    var dataRequest = {
+        accessToken: Global_GetCookie('_accessToken')
+    };
+
+    $.ajax({
+        type: 'GET',
+        url: 'https://localhost:7169/Event/GetAllEvents',
+        data: dataRequest,
+        success: function (response) {
+            console.log(response);
+            if (response.statusCode == 200){
+                var events = JSON.parse(response.content).events;
+                var html = "";
+                $.each(events, function(i, item) {
+                    html = html + '<tr>'+
+                        '<td>' + item.id.substring(0, 9) + '...</td>'+
+                        '<td>' + item.subject + '</td>'+
+                        '<td>' + item.body.content + '</td>'+
+                        '<td>' + item.start.dateTime + '</td>'+
+                        '<td>' + item.end.dateTime + '</td>'+
+                        '</tr>';
+                });
+                $('#idTableEvents tbody').append(html);
+            }
+        }
+    });
+    */
+});
+
+var LanzarModalEliminar = function (id, titulo) {
+    $("#idEventToDelete").val(id);
+    $("#idPEliminar").html("<b>" + titulo + "</b>");
+    $("#modal-delete").modal("show");
+    return false;
+};
+
+</script>

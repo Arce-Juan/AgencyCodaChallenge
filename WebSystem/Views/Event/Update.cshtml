@@ -1,0 +1,75 @@
+﻿@using WebSystem.Models.Outlook
+
+@model ABMEventModel
+@{
+    ViewData["Title"] = "Actualizar Evento";
+    Layout = "~/Views/Shared/_PrincipalSitie.cshtml";
+}
+
+<style media="screen">
+    #uploadForm,
+    #imagePreview {
+        width: 720px;
+        margin: 0 auto;
+    }
+
+    img {
+        max-width: 250px;
+        height: auto;
+    }
+</style>
+
+<div class="row">
+    <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12">
+        <h3>Nuevo Evento</h3>
+        @using (Html.BeginForm("UpdateEvent", "Event", new {}, FormMethod.Post, false, new { @class = "form-horizontal", role = "form" }))
+        {
+
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="UserNameText">Titulo</label>
+            <input id="idHiddenToken" name="nHiddenToken" type="hidden" value="@Model.AccessToken">
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="UserNameText">Titulo</label>
+            <input class="form-control" data-val="true" id="idInputTitulo" name="nInputTitulo" placeholder="" type="text" value="">
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="UserNameText">Detalles</label>
+            <input class="form-control" data-val="true" id="idInputDetalles" name="nInputDetalles" placeholder="" type="text" value="">
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="UserNameText">Inicia</label>
+            <input class="form-control" id="idInputInicia" name="nInputInicia" type="datetime-local">
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="UserNameText">Finaliza</label>
+            <input class="form-control" id="idInputFinaliza" name="nInputFinaliza"  type="datetime-local">
+        </div>
+
+         <div class="form-group">
+            <button class="btn btn-primary" type="submit" id="idButtonCreate">Guardar</button>
+            <button class="btn btn-secondary" type="button" id="idButtonReturn">Volver</button>
+        </div>
+        }
+
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    
+jQuery(document).ready(function () {
+
+});
+});
+
+$('#idButtonReturn').on('click', function () {
+    location.href = "https://localhost:7169/Event";
+});
+
+</script>
+

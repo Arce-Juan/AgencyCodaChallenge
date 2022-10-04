@@ -52,14 +52,23 @@ namespace ExternalServices.Outlook.Services
 
         public async Task CreateEventAsync(EventDto eventDto, string accessToken)
         {
-            RestClient restClient = new RestClient("https://graph.microsoft.com/v1.0/me/calendar/events");
-            RestRequest restRequest = new RestRequest();
+            try
+            {
+                RestClient restClient = new RestClient("https://graph.microsoft.com/v1.0/me/calendar/events");
+                RestRequest restRequest = new RestRequest();
 
-            restRequest.AddHeader("Authorization", "Bearer " + accessToken);
-            restRequest.AddHeader("Content-Type", "application/json");
-            restRequest.AddParameter("application/json", JsonConvert.SerializeObject(eventDto), ParameterType.RequestBody);
+                restRequest.AddHeader("Authorization", "Bearer " + accessToken);
+                restRequest.AddHeader("Content-Type", "application/json");
+                restRequest.AddParameter("application/json", JsonConvert.SerializeObject(eventDto), ParameterType.RequestBody);
 
-            await restClient.PostAsync(restRequest);
+                await restClient.PostAsync(restRequest);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+            
         }
         public async Task UpdateEventAsync(EventDto calendarEvent, string accessToken)
         {

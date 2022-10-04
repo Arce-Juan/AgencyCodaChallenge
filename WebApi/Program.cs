@@ -16,7 +16,7 @@ builder.Services.AddTransient<IEventService, EventService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy",
-        corsbuilder => corsbuilder.WithOrigins("https://localhost:44444")
+        corsbuilder => corsbuilder.WithOrigins("https://localhost:7169")
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials());
@@ -51,6 +51,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 

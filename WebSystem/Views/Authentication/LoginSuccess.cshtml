@@ -1,0 +1,36 @@
+﻿@using WebSystem.Models.Outlook
+
+@model LoginSuccessModel
+@{
+    ViewData["Title"] = "LoginSuccess";
+    Layout = "~/Views/Shared/_PrincipalSitie.cshtml";
+}
+
+<h1>Comprobando autenticación...</h1>
+
+
+<script type="text/javascript">
+
+jQuery(document).ready(function () {
+    var dataRequest = {
+        CodeAuth: "@Model.Code"
+    };
+
+    $.ajax({
+        type: 'GET',
+        url: 'https://localhost:7169/Authentication/Callback',
+        data: dataRequest,
+        success: function (response) {
+            if (response.statusCode == 200){
+                var accessToken = JSON.parse((JSON.parse(response.content).content)).access_token;
+                Global_SetCookie('_accessToken', accessToken);
+
+                var tokeee = Global_GetCookie('_accessToken');
+
+                location.href = "https://localhost:7169/Event?accessToken=" + tokeee;
+            }
+        }
+    });
+});
+
+</script>

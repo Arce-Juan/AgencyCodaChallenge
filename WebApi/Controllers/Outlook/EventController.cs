@@ -11,14 +11,12 @@ namespace WebApi.Controllers.Outlook
     [ApiVersion("1.0")]
     public class EventController : BaseApiController
     {
-        private readonly IConfiguration _configuration;
-        public EventController(IConfiguration configuration)
+        public EventController()
         {
-            _configuration = configuration;
         }
 
-        [HttpGet("AllEvents/{accessToken}")]
-        public async Task<IActionResult> AllEvents([FromRoute] string accessToken)
+        [HttpGet("AllEvents")]
+        public async Task<IActionResult> AllEvents(string accessToken)
         {
             return Ok(await Mediator.Send(new GetAllEventsRequest()
             {
@@ -27,7 +25,7 @@ namespace WebApi.Controllers.Outlook
         }
 
         [HttpGet("GetEvent/{eventId}/{accessToken}")]
-        public async Task<IActionResult> GetEvent([FromRoute] string eventId, [FromRoute] string accessToken)
+        public async Task<IActionResult> GetEvent(string accessToken, [FromRoute] string eventId)
         {
             return Ok(await Mediator.Send(new GetEventRequest()
             {
@@ -36,8 +34,9 @@ namespace WebApi.Controllers.Outlook
             }));
         }
 
-        [HttpPost("CreateEvent/{accessToken}")]
-        public async Task<IActionResult> CreateEvent([FromRoute] string accessToken, [FromBody] EventCalendar calendarEvent)
+        [HttpPost("CreateEvent")]
+        public async Task<IActionResult> CreateEvent([FromQuery] string accessToken, [FromBody] EventCalendar calendarEvent)
+        //public async Task<IActionResult> CreateEvent([FromBody] EventCalendar calendarEvent)
         {
             return Ok(await Mediator.Send(new CreateEventRequest()
             {
@@ -47,7 +46,7 @@ namespace WebApi.Controllers.Outlook
         }
 
         [HttpPut("UpdateEvent/{eventId}/{accessToken}")]
-        public async Task<IActionResult> UpdateEvent([FromRoute] string eventId, [FromRoute] string accessToken, [FromBody] EventCalendar calendarEvent)
+        public async Task<IActionResult> UpdateEvent([FromRoute] string accessToken, [FromRoute] string eventId, [FromBody] EventCalendar calendarEvent)
         {
             calendarEvent.Id = eventId;
             return Ok(await Mediator.Send(new UpdateEventRequest()
@@ -57,8 +56,8 @@ namespace WebApi.Controllers.Outlook
             }));
         }
 
-        [HttpDelete("DeleteEvent/{eventId}/{accessToken}")]
-        public async Task<IActionResult> DeleteEvent([FromRoute] string eventId, [FromRoute] string accessToken)
+        [HttpDelete("DeleteEvent")]
+        public async Task<IActionResult> DeleteEvent([FromQuery] string accessToken, [FromQuery] string eventId)
         {
             return Ok(await Mediator.Send(new DeleteEventRequest()
             {
